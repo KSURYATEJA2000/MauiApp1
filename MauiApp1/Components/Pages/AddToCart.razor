@@ -1,0 +1,75 @@
+﻿@page "/AddToCart"
+
+@layout MainLayout
+
+<PageTitle>Page Title</PageTitle>
+
+@using System.Data
+@using System.Dynamic
+@using MauiApp1.Services
+
+<style>
+    .table img {
+        height: 100px; /* Ensures consistent image height */
+        width: 100px; /* Ensures consistent image width */
+        object-fit: cover; /* Ensures images cover the space nicely */
+    }
+
+    .table th, .table td {
+        vertical-align: middle; /* Aligns content vertically in the middle */
+    }
+</style>
+
+@if (Cart.Items == null || !Cart.Items.Any())
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-8">
+            <ul class="list-group">
+                @foreach (var item in Cart.Items)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5>@item.Name</h5>
+                            <p>Price: @item.Price?.ToString("N2")</p>
+                            @if (!string.IsNullOrEmpty(item.InternalImage))
+                            {
+                                <img src="@item.InternalImage" alt="Product Image" class="img-fluid" />
+                            }
+                            else
+                            {
+                                <span>No Image Available</span>
+                            }
+                        </div>
+                        <div>
+                            <input type="number" class="form-control" style="width: 80px;" @bind="item.Quantity" @bind:event="oninput" min="0" />
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    Cart Total
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">@Cart.GetTotal()?.ToString("N2")</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Cart.Items == null || !Cart.Items.Any())
+        {
+            Cart.Items = ApiCall.Deserialize<List<CartState.Item>>(await ApiCall.CallOneAsync("SELECT ID, Name, Price, CAST(InternalImage AS VARCHAR(MAX)) [InternalImage] FROM dbo.Items", IApiCall.ApiGetDataTable));
+        }
+    }
+}

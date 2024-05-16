@@ -1,0 +1,62 @@
+﻿@page "/items"
+@using Blazored.FluentValidation
+@layout MainLayout
+
+<PageTitle>Page Title</PageTitle>
+
+<div class="container">
+    <EditForm Model="@(M0)"
+              OnSubmit="@(OnSubmit)">
+        <FluentValidationValidator DisableAssemblyScanning="true" />
+        <div class="row">
+            <!-- Name Input -->
+            <div class="col-md-4">
+                <label for="name">Name *</label>
+                <InputText @bind-Value="M0.Name"
+                           class="form-control"
+                           id="name" />
+                <ValidationMessage For="@(() => M0.Name)" />
+
+            </div>
+
+            <!-- Price Input -->
+            <div class="col-md-4">
+                <label for="price">Price *</label>
+                <InputNumber @bind-Value="M0.Price"
+                             class="form-control"
+                             id="price" />
+                <ValidationMessage For="@(() => M0.Price)" />
+
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <!-- Image Upload and Preview -->
+            <div class="col-md-4">
+                <label for="imageUpload">Upload Image</label>
+                <InputFile id="imageUpload"
+                           OnChange="LoadImage" />
+                @if (M0.Image != null)
+                {
+                    <div class="row mt-3">
+                        <div>
+                            <img src="@M0.Image"
+                                 alt="Preview Image"
+                                 style="max-width: 100px; max-height: 100px;" />
+                            <button class="btn btn-danger btn-sm" type="button"
+                                    @onclick="DeleteImage">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Insert</button>
+            </div>
+        </div>
+    </EditForm>
+</div>

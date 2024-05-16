@@ -1,0 +1,71 @@
+﻿@page "/ItemsList"
+@layout MainLayout
+
+<PageTitle>Page Title</PageTitle>
+@using System.Data
+@using System.Dynamic
+
+<style>
+    .table img {
+        height: 100px; /* Ensures consistent image height */
+        width: 100px; /* Ensures consistent image width */
+        object-fit: cover; /* Ensures images cover the space nicely */
+    }
+
+    .table th, .table td {
+        vertical-align: middle; /* Aligns content vertically in the middle */
+    }
+</style>
+
+@if (Items == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table table-hover">
+        <!-- Added table-hover for better UX -->
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Items.Count > 0)
+            {
+                @foreach (dynamic item in Items)
+                {
+                    <tr @onclick="@(() => NavigationManager.NavigateTo($"items?QString1={item.ID}"))">
+                        <td>@item.ID</td>
+                        <td>@item.Name</td>
+                        <td>@Convert.ToDouble(item.Price).ToString("N2")</td>
+                        <td>
+                            @if (Convert.ToString(item.InternalImage) != "")
+                            {
+                                <img src="@item.InternalImage" alt="Product Image" />
+                            }
+                            else
+                            {
+                                <span>No Image Available</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ExpandoObject> Items;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var dtGrid = ApiCall.Deserialize<DataTable>(await ApiCall.CallOneAsync("SELECT ID, Name, Price, CAST(InternalImage AS VARCHAR(MAX)) [InternalImage] FROM dbo.Items", IApiCall.ApiGetDataTable));
+        Items = dtGrid.ToExpandoObject().ToList();
+        StateHasChanged();
+    }
+}
